@@ -213,7 +213,9 @@ def main():
     conn = psycopg2.connect(f"host={DB_ENDPOINT} dbname={DB_NAME} user={DB_USER} password={DB_PASSWORD} port={DB_PORT}")
     cur = conn.cursor()
 
+    print('dropping tables')
     drop_tables(cur, conn)
+    print('creating tables')
     create_tables(cur, conn)
 
     conn.close()

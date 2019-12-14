@@ -4,6 +4,8 @@ import configparser
 # CONFIG
 config = configparser.ConfigParser()
 config.read('dwh.cfg')
+[LOG_DATA, LOG_JSONPATH, SONG_DATA] = config['S3'].values()
+ARN = config['IAM_ROLE']['ARN']
 
 # DROP TABLES
 
@@ -21,42 +23,45 @@ time_table_drop = "DROP TABLE IF EXISTS time"
 
 staging_events_table_create= ("""
 CREATE TABLE IF NOT EXISTS staging_events_table (
+    event_id int IDENTITY(0,1),
     artist text,
-    auth text NOT NULL,
-    firstName text NOT NULL,
-    itemInSession int NOT NULL,
-    lastName text NOT NULL,
+    auth text,
+    firstName text,
+    gender text,
+    itemInSession varchar(50),
+    lastName text,
     length float,
-    level text NOT NULL,
-    location text NOT NULL,
-    method text NOT NULL,
-    page text NOT NULL,
-    registration text,
-    sessionId int NOT NULL,
+    level text,
+    location text,
+    method text,
+    page text,
+    registration varchar(50),
+    sessionId int,
     song text,
-    status int NOT NULL,
-    ts int NOT NULL,
+    status int,
+    ts bigint,
     userAgent text,
-    userId int)
+    userId int,
+    PRIMARY KEY (event_id))
 """)
 
 staging_songs_table_create = ("""
 CREATE TABLE IF NOT EXISTS staging_songs_table (
-    num_songs int NOT NULL,
-    artist_id text NOT NULL,
+    num_songs int,
+    artist_id text,
     artist_latitude float,
     artist_longitude float,
     artist_location text,
-    artist_name text NOT NULL,
-    song_id text NOT NULL,
-    title text NOT NULL,
-    duration float NOT NULL,
-    year int NOT NULL)
+    artist_name text,
+    song_id text,
+    title text,
+    duration float,
+    year int)
 """)
 
 songplay_table_create = ("""
 CREATE TABLE IF NOT EXISTS songplays (
-    songplay_id int IDENTITY(0,1) PRIMARY KEY, 
+    songplay_id int PRIMARY KEY, 
     start_time date NOT NULL, 
     user_id int NOT NULL, 
     level text NOT NULL, 
@@ -108,10 +113,18 @@ CREATE TABLE IF NOT EXISTS time (
 # STAGE TABLES
 
 staging_events_copy = ("""
-""").format()
+copy {} from '{}'
+credentials 'aws_iam_role={}'
+region 'us-west-2'
+json '{}';
+""").format('staging_events_table', LOG_DATA, ARN, LOG_JSONPATH)
 
 staging_songs_copy = ("""
-""").format()
+copy {} from '{}'
+credentials 'aws_iam_role={}'
+region 'us-west-2'
+json 'auto'
+""").format('staging_songs_table', LOG_DATA, ARN)
 
 # FILL TABLES
 
