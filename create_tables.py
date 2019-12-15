@@ -172,6 +172,7 @@ def open_TCP_port(config, KEY, SECRET):
         
     return endpoint
 
+
 def main():
     ####################### INGESTION ##########################
     config = configparser.ConfigParser()
@@ -223,6 +224,6 @@ def main():
     
 if __name__ == "__main__":
     main()
-    #test()
+    
     
     
